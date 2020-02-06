@@ -3,9 +3,13 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from profiles_api.serializers import HelloSerializer
+from profiles_api.serializers import HelloSerializer,UserProfileSerializer
 from rest_framework import status
-from rest_framework.viewsets import ViewSet
+from rest_framework import viewsets
+from profiles_api import models
+from profiles_api import permissions
+from rest_framework.authentication import TokenAuthentication
+from rest_framework import filters
 
 class HelloApiView(APIView):
     serializer_class=HelloSerializer
@@ -36,7 +40,7 @@ class HelloApiView(APIView):
     def delete(self,request):
         return Response({'method':'DELETE'})
 
-class HelloAPiViewSet(ViewSet):
+class HelloAPiViewSet(viewsets.ViewSet):
     serializer_class=HelloSerializer
     def list(self,request):
         messge=[
@@ -64,3 +68,11 @@ class HelloAPiViewSet(ViewSet):
         return Response({'method':'PATCH'})
     def delete(self,request,pk=None):
         return Response({'method':'DELETE'})
+
+class UserProfileSerializer(viewsets.ModelViewSet):
+    serializer_class=UserProfileSerializer
+    queryset=models.UserProfile.objects.all()
+    authentication_classes=(TokenAuthentication,)
+    permission_classes=(permissions.UpdateOwnProfile,)
+    filter_backends=(filters.SearchFilter,)
+    search_fields=('name','email')
